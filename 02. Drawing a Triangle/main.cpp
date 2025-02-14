@@ -324,6 +324,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 
         d3d11DeviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
+        // @@JAMESF -- added this for loop. Having 3+ draws seemed mandatory.
         for (int i = 0; i < 3; ++i) {
             d3d11DeviceContext->Draw(numVerts, 0);
         }
@@ -331,6 +332,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
         d3d11SwapChain->Present(1, 0);
     }
 
+    // @@JAMESF -- added these manual releases
     vertexBuffer->Release(); vertexBuffer = nullptr;
     inputLayout->Release(); inputLayout = nullptr;
 
