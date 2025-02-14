@@ -9,31 +9,33 @@
 
 #include <assert.h>
 
+//#define DEBUG_BUILD
+
 static bool global_windowDidResize = false;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
     LRESULT result = 0;
-    switch(msg)
+    switch (msg)
     {
-        case WM_KEYDOWN:
-        {
-            if(wparam == VK_ESCAPE)
-                DestroyWindow(hwnd);
-            break;
-        }
-        case WM_DESTROY:
-        {
-            PostQuitMessage(0);
-            break;
-        }
-        case WM_SIZE:
-        {
-            global_windowDidResize = true;
-            break;
-        }
-        default:
-            result = DefWindowProcW(hwnd, msg, wparam, lparam);
+    case WM_KEYDOWN:
+    {
+        if (wparam == VK_ESCAPE)
+            DestroyWindow(hwnd);
+        break;
+    }
+    case WM_DESTROY:
+    {
+        PostQuitMessage(0);
+        break;
+    }
+    case WM_SIZE:
+    {
+        global_windowDidResize = true;
+        break;
+    }
+    default:
+        result = DefWindowProcW(hwnd, msg, wparam, lparam);
     }
     return result;
 }
@@ -53,7 +55,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
         winClass.lpszClassName = L"MyWindowClass";
         winClass.hIconSm = LoadIconW(0, IDI_APPLICATION);
 
-        if(!RegisterClassExW(&winClass)) {
+        if (!RegisterClassExW(&winClass)) {
             MessageBoxA(0, "RegisterClassEx failed", "Fatal Error", MB_OK);
             return GetLastError();
         }
@@ -64,15 +66,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
         LONG initialHeight = initialRect.bottom - initialRect.top;
 
         hwnd = CreateWindowExW(WS_EX_OVERLAPPEDWINDOW,
-                                winClass.lpszClassName,
-                                L"02. Drawing a Triangle",
-                                WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-                                CW_USEDEFAULT, CW_USEDEFAULT,
-                                initialWidth, 
-                                initialHeight,
-                                0, 0, hInstance, 0);
+            winClass.lpszClassName,
+            L"02. Drawing a Triangle",
+            WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+            CW_USEDEFAULT, CW_USEDEFAULT,
+            initialWidth,
+            initialHeight,
+            0, 0, hInstance, 0);
 
-        if(!hwnd) {
+        if (!hwnd) {
             MessageBoxA(0, "CreateWindowEx failed", "Fatal Error", MB_OK);
             return GetLastError();
         }
@@ -86,20 +88,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
         ID3D11DeviceContext* baseDeviceContext;
         D3D_FEATURE_LEVEL featureLevels[] = { D3D_FEATURE_LEVEL_11_0 };
         UINT creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-        #if defined(DEBUG_BUILD)
+#if defined(DEBUG_BUILD)
         creationFlags |= D3D11_CREATE_DEVICE_DEBUG;
-        #endif
+#endif
 
-        HRESULT hResult = D3D11CreateDevice(0, D3D_DRIVER_TYPE_HARDWARE, 
-                                            0, creationFlags, 
-                                            featureLevels, ARRAYSIZE(featureLevels), 
-                                            D3D11_SDK_VERSION, &baseDevice, 
-                                            0, &baseDeviceContext);
-        if(FAILED(hResult)){
+        HRESULT hResult = D3D11CreateDevice(0, D3D_DRIVER_TYPE_HARDWARE,
+            0, creationFlags,
+            featureLevels, ARRAYSIZE(featureLevels),
+            D3D11_SDK_VERSION, &baseDevice,
+            0, &baseDeviceContext);
+        if (FAILED(hResult)) {
             MessageBoxA(0, "D3D11CreateDevice() failed", "Fatal Error", MB_OK);
             return GetLastError();
         }
-        
+
         // Get 1.1 interface of D3D11 Device and Context
         hResult = baseDevice->QueryInterface(__uuidof(ID3D11Device1), (void**)&d3d11Device);
         assert(SUCCEEDED(hResult));
@@ -112,11 +114,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 
 #ifdef DEBUG_BUILD
     // Set up debug layer to break on D3D11 errors
-    ID3D11Debug *d3dDebug = nullptr;
+    ID3D11Debug* d3dDebug = nullptr;
     d3d11Device->QueryInterface(__uuidof(ID3D11Debug), (void**)&d3dDebug);
     if (d3dDebug)
     {
-        ID3D11InfoQueue *d3dInfoQueue = nullptr;
+        ID3D11InfoQueue* d3dInfoQueue = nullptr;
         if (SUCCEEDED(d3dDebug->QueryInterface(__uuidof(ID3D11InfoQueue), (void**)&d3dInfoQueue)))
         {
             d3dInfoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_CORRUPTION, true);
@@ -152,7 +154,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
             assert(SUCCEEDED(hResult));
             dxgiAdapter->Release();
         }
-        
+
         DXGI_SWAP_CHAIN_DESC1 d3d11SwapChainDesc = {};
         d3d11SwapChainDesc.Width = 0; // use window width
         d3d11SwapChainDesc.Height = 0; // use window height
@@ -171,7 +173,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 
         dxgiFactory->Release();
     }
-    
+
     // Create Framebuffer Render Target
     ID3D11RenderTargetView* d3d11FrameBufferView;
     {
@@ -190,12 +192,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
     {
         ID3DBlob* shaderCompileErrorsBlob;
         HRESULT hResult = D3DCompileFromFile(L"shaders.hlsl", nullptr, nullptr, "vs_main", "vs_5_0", 0, 0, &vsBlob, &shaderCompileErrorsBlob);
-        if(FAILED(hResult))
+        if (FAILED(hResult))
         {
             const char* errorString = NULL;
-            if(hResult == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND))
+            if (hResult == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND))
                 errorString = "Could not compile shader; file not found";
-            else if(shaderCompileErrorsBlob){
+            else if (shaderCompileErrorsBlob) {
                 errorString = (const char*)shaderCompileErrorsBlob->GetBufferPointer();
                 shaderCompileErrorsBlob->Release();
             }
@@ -213,12 +215,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
         ID3DBlob* psBlob;
         ID3DBlob* shaderCompileErrorsBlob;
         HRESULT hResult = D3DCompileFromFile(L"shaders.hlsl", nullptr, nullptr, "ps_main", "ps_5_0", 0, 0, &psBlob, &shaderCompileErrorsBlob);
-        if(FAILED(hResult))
+        if (FAILED(hResult))
         {
             const char* errorString = NULL;
-            if(hResult == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND))
+            if (hResult == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND))
                 errorString = "Could not compile shader; file not found";
-            else if(shaderCompileErrorsBlob){
+            else if (shaderCompileErrorsBlob) {
                 errorString = (const char*)shaderCompileErrorsBlob->GetBufferPointer();
                 shaderCompileErrorsBlob->Release();
             }
@@ -262,7 +264,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 
         D3D11_BUFFER_DESC vertexBufferDesc = {};
         vertexBufferDesc.ByteWidth = sizeof(vertexData);
-        vertexBufferDesc.Usage     = D3D11_USAGE_IMMUTABLE;
+        vertexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
         vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
         D3D11_SUBRESOURCE_DATA vertexSubresourceData = { vertexData };
@@ -273,31 +275,31 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 
     // Main Loop
     bool isRunning = true;
-    while(isRunning)
+    while (isRunning)
     {
         MSG msg = {};
-        while(PeekMessageW(&msg, 0, 0, 0, PM_REMOVE))
+        while (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE))
         {
-            if(msg.message == WM_QUIT)
+            if (msg.message == WM_QUIT)
                 isRunning = false;
             TranslateMessage(&msg);
             DispatchMessageW(&msg);
         }
 
-        if(global_windowDidResize)
+        if (global_windowDidResize)
         {
             d3d11DeviceContext->OMSetRenderTargets(0, 0, 0);
             d3d11FrameBufferView->Release();
 
             HRESULT res = d3d11SwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
             assert(SUCCEEDED(res));
-            
+
             ID3D11Texture2D* d3d11FrameBuffer;
             res = d3d11SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&d3d11FrameBuffer);
             assert(SUCCEEDED(res));
 
             res = d3d11Device->CreateRenderTargetView(d3d11FrameBuffer, NULL,
-                                                     &d3d11FrameBufferView);
+                &d3d11FrameBufferView);
             assert(SUCCEEDED(res));
             d3d11FrameBuffer->Release();
 
@@ -322,10 +324,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 
         d3d11DeviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
-        d3d11DeviceContext->Draw(numVerts, 0);
-        
+        for (int i = 0; i < 3; ++i) {
+            d3d11DeviceContext->Draw(numVerts, 0);
+        }
+
         d3d11SwapChain->Present(1, 0);
     }
+
+    vertexBuffer->Release(); vertexBuffer = nullptr;
+    inputLayout->Release(); inputLayout = nullptr;
+
+    vertexShader->Release(); vertexShader = nullptr;
+    pixelShader->Release(); pixelShader = nullptr;
+
+    d3d11FrameBufferView->Release(); d3d11FrameBufferView = nullptr;
+    d3d11SwapChain->Release(); d3d11SwapChain = nullptr;
+    d3d11DeviceContext->Release(); d3d11DeviceContext = nullptr;
+
+#ifdef DEBUG_BUILD
+    d3dDebug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+#endif// DEBUG_BUILD
+    d3d11Device->Release(); d3d11Device = nullptr;
 
     return 0;
 }
